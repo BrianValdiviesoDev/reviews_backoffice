@@ -1,13 +1,14 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { PostProduct } from '../../../entities/product.entity';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, TextareaAutosize as BaseTextareaAutosize, FormControl, styled } from '@mui/material';
 import { FieldArray, Form, Formik, FormikHelpers, FormikProps } from 'formik';
 import * as yup from 'yup';
 import { createProduct, getProduct } from '../../../api/products.service';
 import { AxiosError } from 'axios';
 import { ApiHandlerError } from '../../../api/api.handler';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 export default function ProductForm({ params }: { params: { id: string } }) {
   const [productId, setProductId] = useState<string>(params.id);
@@ -17,6 +18,7 @@ export default function ProductForm({ params }: { params: { id: string } }) {
     urls: [],
   });
   const formikRef = useRef<FormikHelpers<PostProduct> | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const getData = async () => {
@@ -44,18 +46,35 @@ export default function ProductForm({ params }: { params: { id: string } }) {
     ),
   });
 
-  useEffect(() => {
-    console.log(product);
-  }, [product]);
-
   const handleSubmit = async (values: PostProduct) => {
     try {
       await createProduct(values);
       toast.success('Product created');
+      router.push('/products');
     } catch (e: any) {
       ApiHandlerError(e as AxiosError);
     }
   };
+
+
+  const Textarea = styled(BaseTextareaAutosize)(
+    ({ theme }) => `
+    width: 100%;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    padding: 12px;
+    border-radius: 5px;
+    background-color: transparent;
+
+
+    // firefox
+    &:focus-visible {
+      outline: 0;
+    }
+  `,
+  );
 
   return (
     <>
@@ -100,6 +119,11 @@ export default function ProductForm({ params }: { params: { id: string } }) {
                 helperText={touched.sku && errors.sku}
                 margin="normal"
               />
+              <Box>
+              <Typography>Properties</Typography>
+
+              </Box>
+              <Textarea  minRows={10}/>
               <FieldArray
                 name="urls"
                 render={(arrayHelpers) => (

@@ -17,3 +17,10 @@ export interface Request {
   productId: string;
   executionDate: Date;
 }
+
+export interface PutRequest {
+  url?: string;
+  type?: RequestType;
+  status?: RequestStatus;
+  productId?: string;
+}

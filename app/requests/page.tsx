@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import {
+  Button,
   Grid,
   Table,
   TableBody,
@@ -11,19 +12,33 @@ import {
   Typography,
 } from '@mui/material';
 import moment from 'moment';
-import { Request } from '../entities/request.entity';
-import { findAllRequests } from '../api/requests.service';
+import { Request, RequestStatus } from '../entities/request.entity';
+import { cancelRequest, findAllRequests, removeRequest } from '../api/requests.service';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 export default function Requests() {
   const [requests, setRequests] = useState<Request[]>([]);
 
+  const getData = async () => {
+    const req = await findAllRequests();
+    setRequests(req);
+  };
+
+  const remove = async (id: string) => {
+    const req = await removeRequest(id);
+    getData();
+  }
+
+  const cancel = async (id: string) => {
+    const req = await cancelRequest(id);
+    getData();
+  }
+
   useEffect(() => {
-    const getData = async () => {
-      const req = await findAllRequests();
-      setRequests(req);
-    };
     getData();
   }, []);
+
   return (
     <>
       <Grid container spacing={2}>
@@ -56,6 +71,25 @@ export default function Requests() {
                         'YYYY-MM-DD HH:mm:ss',
                       )
                     : '--'}
+                </TableCell>
+                <TableCell>
+                      {request.status === RequestStatus.PENDING ? (
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => cancel(request._id)}
+                        >
+                          <RemoveCircleIcon />
+                        </Button>
+                       ):(
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => remove(request._id)}
+                        >
+                          <DeleteIcon />
+                        </Button>
+                       )}
                 </TableCell>
               </TableRow>
             </>

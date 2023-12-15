@@ -1,6 +1,6 @@
 export interface Matches {
   url: string;
-  name?: string;
+  title?: string;
   price?: number;
   rating?: number;
   reviews?: number;
