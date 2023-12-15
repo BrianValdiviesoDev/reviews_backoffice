@@ -5,6 +5,7 @@ export interface Matches {
   rating?: number;
   reviews?: number;
   lastUpdate?: Date;
+  matchPercentage?: number;
 }
 
 export interface Product {
@@ -13,6 +14,7 @@ export interface Product {
   image?: string;
   sku?: string;
   urls?: Matches[];
+  properties?: string;
 }
 
 export interface PostProduct {
@@ -20,4 +22,5 @@ export interface PostProduct {
   image?: string;
   sku?: string;
   urls?: Matches[];
+  properties?: string;
 }

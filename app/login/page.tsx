@@ -1,11 +1,12 @@
 'use client';
-import { TextField, Button, Container, Typography } from '@mui/material';
+import { TextField, Button, Container, Typography, Alert } from '@mui/material';
 import { Form, Formik } from 'formik';
 import * as yup from 'yup';
 import { AxiosError } from 'axios';
 import { useAuthStore } from '../stores/auth.store';
 import { login } from '../api/auth.service';
 import { ApiHandlerError } from '../api/api.handler';
+import { useState } from 'react';
 
 interface Login {
   email: string;
@@ -13,6 +14,7 @@ interface Login {
 }
 export default function Login() {
   const { setAuth } = useAuthStore();
+  const [error, setError] = useState<string>();
   const validationSchema = yup.object({
     email: yup.string().required('Email is required'),
     password: yup.string().required('Email is required'),
@@ -23,7 +25,10 @@ export default function Login() {
       const response = await login(values);
       setAuth(response.user, response.token);
     } catch (e: any) {
-      ApiHandlerError(e as AxiosError);
+      const err = e as AxiosError;
+      if (err.response?.status === 404) {
+        setError('User not found');
+      }
     }
   };
 
@@ -74,6 +79,7 @@ export default function Login() {
               <Button type="submit" variant="contained" color="primary">
                 Login
               </Button>
+              {error && <Alert severity="error">{error}</Alert>}
             </Form>
           )}
         </Formik>
