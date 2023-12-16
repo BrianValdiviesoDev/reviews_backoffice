@@ -9,7 +9,6 @@ import {
   TableBody,
   TableRow,
   Typography,
-  Link,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Product } from '../../entities/product.entity';
@@ -19,6 +18,7 @@ import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import moment from 'moment';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import Link from 'next/link';
 
 export default function Product({ params }: { params: { id: string } }) {
   const [productId, setProductId] = useState<string>(params.id);
@@ -60,6 +60,14 @@ export default function Product({ params }: { params: { id: string } }) {
             </Grid>
             <Grid item xs={12}>
               <Typography>SKU: {product.sku}</Typography>
+              {product.originUrl &&(
+                <Typography>URL: <Link href={product.originUrl}            
+              >View</Link></Typography>
+              )}
+              <Typography>
+                Properties: {product?.properties}
+              </Typography>
+              
             </Grid>
           </Grid>
 

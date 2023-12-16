@@ -15,6 +15,7 @@ export interface Product {
   sku?: string;
   urls?: Matches[];
   properties?: string;
+  originUrl?: string;
 }
 
 export interface PostProduct {
@@ -23,4 +24,5 @@ export interface PostProduct {
   sku?: string;
   urls?: Matches[];
   properties?: string;
+  originUrl?: string;
 }

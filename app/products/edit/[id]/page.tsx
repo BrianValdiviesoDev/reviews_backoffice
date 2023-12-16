@@ -2,9 +2,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { PostProduct } from '../../../entities/product.entity';
 import { TextField, Button, Container, Typography, Box, TextareaAutosize as BaseTextareaAutosize, FormControl, styled } from '@mui/material';
-import { FieldArray, Form, Formik, FormikHelpers, FormikProps } from 'formik';
+import { Field, FieldArray, Form, Formik, FormikHelpers, FormikProps } from 'formik';
 import * as yup from 'yup';
-import { createProduct, getProduct } from '../../../api/products.service';
+import { createProduct, getProduct, updateProduct } from '../../../api/products.service';
 import { AxiosError } from 'axios';
 import { ApiHandlerError } from '../../../api/api.handler';
 import { toast } from 'react-toastify';
@@ -14,7 +14,6 @@ export default function ProductForm({ params }: { params: { id: string } }) {
   const [productId, setProductId] = useState<string>(params.id);
   const [product, setProduct] = useState<PostProduct>({
     name: '',
-    sku: '',
     urls: [],
   });
   const formikRef = useRef<FormikHelpers<PostProduct> | null>(null);
@@ -48,9 +47,16 @@ export default function ProductForm({ params }: { params: { id: string } }) {
 
   const handleSubmit = async (values: PostProduct) => {
     try {
-      await createProduct(values);
-      toast.success('Product created');
-      router.push('/products');
+      console.log(productId)
+      if(productId && productId !== 'new') {
+        await updateProduct(productId, values);
+        toast.success('Product updated');
+        router.push('/products');
+      } else {
+        await createProduct(values);
+        toast.success('Product created');
+        router.push('/products');
+      }
     } catch (e: any) {
       ApiHandlerError(e as AxiosError);
     }
@@ -119,11 +125,29 @@ export default function ProductForm({ params }: { params: { id: string } }) {
                 helperText={touched.sku && errors.sku}
                 margin="normal"
               />
+              <TextField
+                label="URL"
+                fullWidth
+                name="originUrl"
+                value={values.originUrl}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.originUrl && Boolean(errors.originUrl)}
+                helperText={touched.originUrl && errors.originUrl}
+                margin="normal"
+              />
               <Box>
               <Typography>Properties</Typography>
 
               </Box>
-              <Textarea  minRows={10}/>
+              <Field
+              name="properties"
+              onBlur={handleBlur} 
+              onChange={handleChange}
+              value={values.properties}
+              as={Textarea}
+              placeholder="Your product properties"
+            />
               <FieldArray
                 name="urls"
                 render={(arrayHelpers) => (
