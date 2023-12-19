@@ -1,28 +1,51 @@
 export interface Matches {
-  url: string;
-  title?: string;
-  price?: number;
-  rating?: number;
-  reviews?: number;
-  lastUpdate?: Date;
-  matchPercentage?: number;
+  product: Product;
+  percentage: number;
+}
+
+export enum ProductType {
+  MANUAL = 'MANUAL',
+  SCRAPPED = 'SCRAPPED',
+}
+
+export enum MarketPlaces {
+  AMAZON = 'AMAZON',
+  PCCOMPONENTES = 'PCCOMPONENTES',
+  MEDIAMARKT = 'MEDIAMARKT',
+  ELCORTEINGLES = 'ELCORTEINGLES',
+  ALIEXPRESS = 'ALIEXPRESS',
+  MANOMANO = 'MANOMANO',
+  EBAY = 'EBAY',
+  FNAC = 'FNAC',
 }
 
 export interface Product {
   _id: string;
+  type: ProductType;
   name: string;
+  marketplace?: MarketPlaces;
   image?: string;
-  sku?: string;
-  urls?: Matches[];
+  originUrl: string;
+  matches?: Matches[];
   properties?: string;
-  originUrl?: string;
+  metadata?: any;
+  price?: number;
+  rating?: number;
+  reviews?: number;
+  updatedAt: Date;
+  createdAt: Date;
 }
 
 export interface PostProduct {
+  type: ProductType;
   name: string;
+  originUrl: string;
+  marketplace?: MarketPlaces;
   image?: string;
-  sku?: string;
-  urls?: Matches[];
+  matches?: Matches[];
   properties?: string;
-  originUrl?: string;
+  metadata?: any;
+  price?: number;
+  rating?: number;
+  reviews?: number;
 }

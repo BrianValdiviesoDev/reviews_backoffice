@@ -1,10 +1,30 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { PostProduct } from '../../../entities/product.entity';
-import { TextField, Button, Container, Typography, Box, TextareaAutosize as BaseTextareaAutosize, FormControl, styled } from '@mui/material';
-import { Field, FieldArray, Form, Formik, FormikHelpers, FormikProps } from 'formik';
+import { PostProduct, ProductType } from '../../../entities/product.entity';
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Box,
+  TextareaAutosize as BaseTextareaAutosize,
+  FormControl,
+  styled,
+} from '@mui/material';
+import {
+  Field,
+  FieldArray,
+  Form,
+  Formik,
+  FormikHelpers,
+  FormikProps,
+} from 'formik';
 import * as yup from 'yup';
-import { createProduct, getProduct, updateProduct } from '../../../api/products.service';
+import {
+  createProduct,
+  getProduct,
+  updateProduct,
+} from '../../../api/products.service';
 import { AxiosError } from 'axios';
 import { ApiHandlerError } from '../../../api/api.handler';
 import { toast } from 'react-toastify';
@@ -13,8 +33,9 @@ import { useRouter } from 'next/navigation';
 export default function ProductForm({ params }: { params: { id: string } }) {
   const [productId, setProductId] = useState<string>(params.id);
   const [product, setProduct] = useState<PostProduct>({
+    type: ProductType.MANUAL,
     name: '',
-    urls: [],
+    originUrl: '',
   });
   const formikRef = useRef<FormikHelpers<PostProduct> | null>(null);
   const router = useRouter();
@@ -38,17 +59,13 @@ export default function ProductForm({ params }: { params: { id: string } }) {
 
   const validationSchema = yup.object({
     name: yup.string().required('Name is required'),
-    urls: yup.array().of(
-      yup.object().shape({
-        url: yup.string().required('URL is required'),
-      }),
-    ),
+    originUrl: yup.string().required('Origin URL is required'),
   });
 
   const handleSubmit = async (values: PostProduct) => {
     try {
-      console.log(productId)
-      if(productId && productId !== 'new') {
+      console.log(productId);
+      if (productId && productId !== 'new') {
         await updateProduct(productId, values);
         toast.success('Product updated');
         router.push('/products');
@@ -61,7 +78,6 @@ export default function ProductForm({ params }: { params: { id: string } }) {
       ApiHandlerError(e as AxiosError);
     }
   };
-
 
   const Textarea = styled(BaseTextareaAutosize)(
     ({ theme }) => `
@@ -115,17 +131,6 @@ export default function ProductForm({ params }: { params: { id: string } }) {
                 margin="normal"
               />
               <TextField
-                label="SKU"
-                fullWidth
-                name="sku"
-                value={values.sku}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.sku && Boolean(errors.sku)}
-                helperText={touched.sku && errors.sku}
-                margin="normal"
-              />
-              <TextField
                 label="URL"
                 fullWidth
                 name="originUrl"
@@ -136,58 +141,18 @@ export default function ProductForm({ params }: { params: { id: string } }) {
                 helperText={touched.originUrl && errors.originUrl}
                 margin="normal"
               />
-              <Box>
-              <Typography>Properties</Typography>
 
+              <Box>
+                <Typography>Properties</Typography>
               </Box>
               <Field
-              name="properties"
-              onBlur={handleBlur} 
-              onChange={handleChange}
-              value={values.properties}
-              as={Textarea}
-              placeholder="Your product properties"
-            />
-              <FieldArray
-                name="urls"
-                render={(arrayHelpers) => (
-                  <>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => arrayHelpers.push({ url: '' })}
-                    >
-                      Add url
-                    </Button>
-                    {values.urls &&
-                      values.urls.map((url, index) => (
-                        <Box key={index}>
-                          <TextField
-                            label="URL"
-                            fullWidth
-                            name={`urls[${index}].url`}
-                            value={url.url}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            error={
-                              touched.urls && Boolean(errors.urls?.[index])
-                            }
-                            helperText={touched.urls && errors.urls?.[index]}
-                            margin="normal"
-                          />
-                          <Button
-                            variant="outlined"
-                            color="warning"
-                            onClick={() => arrayHelpers.remove(index)}
-                          >
-                            Remove
-                          </Button>
-                        </Box>
-                      ))}
-                  </>
-                )}
+                name="properties"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.properties}
+                as={Textarea}
+                placeholder="Your product properties"
               />
-
               <Button type="submit" variant="contained" color="primary">
                 Enviar
               </Button>

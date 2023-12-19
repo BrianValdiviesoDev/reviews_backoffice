@@ -18,7 +18,20 @@ export const createProduct = async (product: PostProduct): Promise<Product> => {
   return response.data;
 };
 
-export const updateProduct = async (id:string, product: PostProduct): Promise<Product> => {
+export const updateProduct = async (
+  id: string,
+  product: PostProduct,
+): Promise<Product> => {
   const response = await axios.put(`${API_URL}/products/${id}`, product);
+  return response.data;
+};
+
+export const verifyProduct = async (
+  id: string,
+  matchId: string,
+): Promise<Product> => {
+  const response = await axios.patch(`${API_URL}/products/${id}/verify`, {
+    matchId,
+  });
   return response.data;
 };

@@ -6,6 +6,7 @@ import { getAllProducts } from '../api/products.service';
 import {
   Button,
   Grid,
+  Tab,
   Table,
   TableBody,
   TableCell,
@@ -50,7 +51,9 @@ export default function Products() {
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell>Image</TableCell>
             <TableCell>Name</TableCell>
+            <TableCell>Type</TableCell>
             <TableCell></TableCell>
           </TableRow>
         </TableHead>
@@ -58,7 +61,13 @@ export default function Products() {
           {products.map((product) => (
             <>
               <TableRow key={product._id}>
+                <TableCell>
+                  {product.image && (
+                    <img src={product.image} height="100" alt={product.name} />
+                  )}
+                </TableCell>
                 <TableCell>{product.name}</TableCell>
+                <TableCell>{product.type}</TableCell>
                 <TableCell>
                   <Button
                     variant="contained"

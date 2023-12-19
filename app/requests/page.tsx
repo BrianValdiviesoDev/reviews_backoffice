@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import {
   Button,
   Grid,
+  Link,
   Table,
   TableBody,
   TableCell,
@@ -13,7 +14,11 @@ import {
 } from '@mui/material';
 import moment from 'moment';
 import { Request, RequestStatus } from '../entities/request.entity';
-import { cancelRequest, findAllRequests, removeRequest } from '../api/requests.service';
+import {
+  cancelRequest,
+  findAllRequests,
+  removeRequest,
+} from '../api/requests.service';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
@@ -28,12 +33,12 @@ export default function Requests() {
   const remove = async (id: string) => {
     const req = await removeRequest(id);
     getData();
-  }
+  };
 
   const cancel = async (id: string) => {
     const req = await cancelRequest(id);
     getData();
-  }
+  };
 
   useEffect(() => {
     getData();
@@ -61,10 +66,18 @@ export default function Requests() {
           {requests.map((request) => (
             <>
               <TableRow key={request._id}>
-                <TableCell>{request.url}</TableCell>
+                <TableCell>
+                  <Link href={request.url} target="_blank">
+                    URL
+                  </Link>
+                </TableCell>
                 <TableCell>{request.type}</TableCell>
                 <TableCell>{request.status}</TableCell>
-                <TableCell>{request.productId}</TableCell>
+                <TableCell>
+                  <Link href={`products/${request.productId}`} target="_blank">
+                    Product
+                  </Link>
+                </TableCell>
                 <TableCell>
                   {request.executionDate
                     ? moment(request.executionDate).format(
@@ -73,23 +86,23 @@ export default function Requests() {
                     : '--'}
                 </TableCell>
                 <TableCell>
-                      {request.status === RequestStatus.PENDING ? (
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => cancel(request._id)}
-                        >
-                          <RemoveCircleIcon />
-                        </Button>
-                       ):(
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => remove(request._id)}
-                        >
-                          <DeleteIcon />
-                        </Button>
-                       )}
+                  {request.status === RequestStatus.PENDING ? (
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => cancel(request._id)}
+                    >
+                      <RemoveCircleIcon />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => remove(request._id)}
+                    >
+                      <DeleteIcon />
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             </>
