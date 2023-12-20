@@ -9,10 +9,9 @@ import {
   TableBody,
   TableRow,
   Typography,
-  Tab,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Product, ProductType } from '../../entities/product.entity';
+import { Matches, Product, ProductType } from '../../entities/product.entity';
 import { getProduct, verifyProduct } from '../../api/products.service';
 import { ApiHandlerError } from '../../api/api.handler';
 import { AxiosError } from 'axios';
@@ -20,7 +19,6 @@ import { useRouter } from 'next/navigation';
 import moment from 'moment';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Link from 'next/link';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { toast } from 'react-toastify';
 
@@ -39,6 +37,23 @@ export default function Product({ params }: { params: { id: string } }) {
     }
   };
 
+  const probabilityAvg = (matches: Matches) => {
+    if (!matches || !matches.percentage) return '--';
+    let sum = 0;
+    console.log(matches);
+    matches.percentage.forEach((percentage: any) => {
+      let number = 0;
+      try {
+        number = parseInt(percentage);
+      } catch (e) {
+        console.error(e);
+        number = 0;
+      }
+      sum += number;
+    });
+    const avg = sum / matches.percentage.length;
+    return avg.toFixed(0);
+  };
   useEffect(() => {
     const getData = async () => {
       if (productId !== 'new') {
@@ -158,7 +173,18 @@ export default function Product({ params }: { params: { id: string } }) {
                           )}
                         </TableCell>
                         <TableCell>{match.product.name}</TableCell>
-                        <TableCell>{`${match.percentage || '--'}%`}</TableCell>
+                        <TableCell>
+                          <>
+                            {`${probabilityAvg(match)}%`}
+                            <br />
+                            {match.percentage &&
+                              match.percentage.length > 1 && (
+                                <Typography variant="caption">
+                                  {match.percentage.join(',')}
+                                </Typography>
+                              )}
+                          </>
+                        </TableCell>
                         <TableCell>{match.product.price}</TableCell>
                         <TableCell>{match.product.rating}</TableCell>
                         <TableCell>{match.product.reviews}</TableCell>

@@ -1,6 +1,6 @@
 export interface Matches {
   product: Product;
-  percentage: number;
+  percentage: any[];
 }
 
 export enum ProductType {
