@@ -35,3 +35,8 @@ export const verifyProduct = async (
   });
   return response.data;
 };
+
+export const checkProductMatches = async (id: string): Promise<void> => {
+  const response = await axios.post(`${API_URL}/queues/checkMatches/${id}`);
+  return response.data;
+};

@@ -17,6 +17,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../stores/auth.store';
+import InfoIcon from '@mui/icons-material/Info';
 
 export default function Sidebar(props: DrawerProps) {
   const { ...other } = props;
@@ -40,6 +41,16 @@ export default function Sidebar(props: DrawerProps) {
       children: [
         { id: 'Users', icon: <GroupIcon />, url: '/users' },
         { id: 'Companies', icon: <ApartmentIcon />, url: '/companies' },
+      ],
+    },
+    {
+      id: 'Admin',
+      children: [
+        {
+          id: 'Api doc',
+          icon: <InfoIcon />,
+          url: `${process.env.NEXT_PUBLIC_API_URL}/api`,
+        },
       ],
     },
   ];
@@ -78,6 +89,10 @@ export default function Sidebar(props: DrawerProps) {
                   <ListItemButton
                     sx={item}
                     onClick={() => {
+                      if (category.url.includes('http')) {
+                        window.open(category.url, '_blank');
+                        return;
+                      }
                       router.push(category.url);
                     }}
                   >
