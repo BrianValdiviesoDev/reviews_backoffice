@@ -32,6 +32,8 @@ export interface Product {
   price?: number;
   rating?: number;
   reviews?: number;
+  scrappedReviews?: number;
+  generatedReviews?: number;
   updatedAt: Date;
   createdAt: Date;
 }

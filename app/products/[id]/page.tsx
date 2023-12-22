@@ -3,11 +3,6 @@ import {
   Alert,
   Button,
   Grid,
-  Table,
-  TableCell,
-  TableHead,
-  TableBody,
-  TableRow,
   Typography,
   Accordion,
   AccordionSummary,
@@ -16,6 +11,8 @@ import {
   CardContent,
   CardActions,
   Avatar,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Matches, Product, ProductType } from '../../entities/product.entity';
@@ -30,11 +27,19 @@ import { useRouter } from 'next/navigation';
 import moment from 'moment';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Link from 'next/link';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { toast } from 'react-toastify';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Review } from '../../entities/review.entity';
 import { findReviewsByProduct } from '../../api/reviews.service';
+import {
+  DataGrid,
+  GridCheckCircleIcon,
+  GridColDef,
+  GridRenderCellParams,
+  GridRowsProp,
+  GridToolbar,
+} from '@mui/x-data-grid';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 
 export default function Product({ params }: { params: { id: string } }) {
   const [productId, setProductId] = useState<string>(params.id);
@@ -42,6 +47,7 @@ export default function Product({ params }: { params: { id: string } }) {
   const [matchesLoading, setMatchesLoading] = useState<boolean>(false);
   const [expanded, setExpanded] = useState<string | false>(false);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [rows, setRows] = useState<GridRowsProp>([]);
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
@@ -60,11 +66,10 @@ export default function Product({ params }: { params: { id: string } }) {
     }
   };
 
-  const probabilityAvg = (matches: Matches) => {
-    if (!matches || !matches.percentage) return '--';
+  const probabilityAvg = (percentages: number[]) => {
+    if (!percentages) return '--';
     let sum = 0;
-    console.log(matches);
-    matches.percentage.forEach((percentage: any) => {
+    percentages.forEach((percentage: any) => {
       let number = 0;
       try {
         number = parseInt(percentage);
@@ -74,15 +79,23 @@ export default function Product({ params }: { params: { id: string } }) {
       }
       sum += number;
     });
-    const avg = sum / matches.percentage.length;
+    const avg = sum / percentages.length;
     return avg.toFixed(0);
   };
 
-  const checkMatches = async () => {
+  const checkMatches = async (matchId?: string) => {
     setMatchesLoading(true);
     try {
-      await checkProductMatches(productId);
-      toast.success('Matches checked');
+      if (!product || !product.matches) return;
+      if (matchId) {
+        await checkProductMatches(productId, [matchId]);
+      } else {
+        await checkProductMatches(
+          productId,
+          product.matches.map((m) => m.product._id),
+        );
+      }
+      toast.success('Checking matches...');
     } catch (e: any) {
       ApiHandlerError(e as AxiosError);
     }
@@ -94,7 +107,9 @@ export default function Product({ params }: { params: { id: string } }) {
       try {
         const product = await getProduct(productId);
         setProduct(product);
-        console.log(product);
+        if (product.matches) {
+          generateRows(product.matches);
+        }
       } catch (e: any) {
         ApiHandlerError(e as AxiosError);
       }
@@ -109,6 +124,87 @@ export default function Product({ params }: { params: { id: string } }) {
       ApiHandlerError(e as AxiosError);
     }
   };
+
+  const generateRows = (matches: Matches[]) => {
+    if (!matches) return;
+    const newRows = matches.map((item, i) => {
+      return {
+        ...item.product,
+        percentage: item.percentage,
+        id: i,
+      };
+    });
+    setRows(newRows || []);
+  };
+
+  const columns: GridColDef[] = [
+    { field: 'name', headerName: 'Name', width: 200 },
+    {
+      field: 'percentage',
+      headerName: 'Percentage',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => {
+        return (
+          <>
+            <Grid>
+              <Typography>{probabilityAvg(params.value)}%</Typography>
+              <Typography sx={{ fontSize: 'smaller' }}>
+                {params.value.join(', ')}
+              </Typography>
+            </Grid>
+          </>
+        );
+      },
+    },
+    { field: 'price', headerName: 'Price', width: 200 },
+    { field: 'rating', headerName: 'Rating', width: 200 },
+    { field: 'reviews', headerName: 'Reviews', width: 200 },
+    { field: 'updatedAt', headerName: 'Last update', width: 200 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => {
+        return (
+          <>
+            <Grid container spacing={1}>
+              <Grid item>
+                <Tooltip title="View product">
+                  <IconButton
+                    onClick={() => {
+                      router.push(`/products/${params.row._id}`);
+                    }}
+                  >
+                    <VisibilityIcon />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
+              <Grid item>
+                <Tooltip title="Compare with product">
+                  <IconButton onClick={() => checkMatches(params.row._id)}>
+                    <CompareArrowsIcon />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
+              {!params.row.percentage.find((p: any) => parseInt(p) === 100) && (
+                <Grid item>
+                  <Tooltip title="Verify match">
+                    <IconButton
+                      onClick={() => {
+                        verify(productId, params.row._id);
+                      }}
+                    >
+                      <GridCheckCircleIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Grid>
+              )}
+            </Grid>
+          </>
+        );
+      },
+    },
+  ];
 
   useEffect(() => {
     if (productId) {
@@ -235,84 +331,23 @@ export default function Product({ params }: { params: { id: string } }) {
               <AccordionDetails>
                 <Grid container spacing={2} mb={6}>
                   <Grid item xs={12}>
-                    <Button variant="contained" onClick={checkMatches}>
-                      Check matches
+                    <Button variant="contained" onClick={() => checkMatches()}>
+                      Check all matches
                     </Button>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Image</TableCell>
-                          <TableCell>Name</TableCell>
-                          <TableCell>Match</TableCell>
-                          <TableCell>Price</TableCell>
-                          <TableCell>Rating</TableCell>
-                          <TableCell>Reviews</TableCell>
-                          <TableCell>Last update</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {matchesLoading ? (
-                          <>
-                            <Alert>Checking products...</Alert>
-                          </>
-                        ) : (
-                          <>
-                            {product.matches?.map((match, i) => (
-                              <TableRow key={`${i}`}>
-                                <TableCell>
-                                  {match.product.image && (
-                                    <img
-                                      src={match.product.image}
-                                      height="100"
-                                      alt={match.product.name}
-                                    />
-                                  )}
-                                </TableCell>
-                                <TableCell>{match.product.name}</TableCell>
-                                <TableCell>
-                                  <>
-                                    {`${probabilityAvg(match)}%`}
-                                    <br />
-                                    {match.percentage &&
-                                      match.percentage.length > 1 && (
-                                        <Typography variant="caption">
-                                          {match.percentage.join(',')}
-                                        </Typography>
-                                      )}
-                                  </>
-                                </TableCell>
-                                <TableCell>{match.product.price}</TableCell>
-                                <TableCell>{match.product.rating}</TableCell>
-                                <TableCell>{match.product.reviews}</TableCell>
-                                <TableCell>
-                                  {match.product.updatedAt
-                                    ? moment(match.product.updatedAt).format(
-                                        'YYYY-MM-DD HH:mm',
-                                      )
-                                    : '--'}
-                                </TableCell>
-                                <TableCell>
-                                  <Link
-                                    target="_blank"
-                                    href={`${match.product.originUrl}`}
-                                  >
-                                    <VisibilityIcon />
-                                  </Link>
-                                  {!match.percentage && (
-                                    <TaskAltIcon
-                                      onClick={() =>
-                                        verify(product._id, match.product._id)
-                                      }
-                                    />
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </>
-                        )}
-                      </TableBody>
-                    </Table>
+                    <DataGrid
+                      rows={rows}
+                      columns={columns}
+                      initialState={{
+                        pagination: {
+                          paginationModel: {
+                            pageSize: 10,
+                          },
+                        },
+                      }}
+                      pageSizeOptions={[5]}
+                      slots={{ toolbar: GridToolbar }}
+                      disableRowSelectionOnClick
+                    />
                   </Grid>
                 </Grid>
               </AccordionDetails>
