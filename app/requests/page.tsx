@@ -35,6 +35,7 @@ import {
 import LaunchIcon from '@mui/icons-material/Launch';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { toast } from 'react-toastify';
+import InfoIcon from '@mui/icons-material/Info';
 
 export default function Requests() {
   const [requests, setRequests] = useState<Request[]>([]);
@@ -74,7 +75,21 @@ export default function Requests() {
 
   const columns: GridColDef[] = [
     { field: 'type', headerName: 'Type', width: 200 },
-    { field: 'status', headerName: 'Status', width: 200 },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => (
+        <>
+          <Typography>{params.row.status}</Typography>
+          {params.row.error && (
+            <Tooltip title={params.row.error}>
+              <InfoIcon />
+            </Tooltip>
+          )}
+        </>
+      ),
+    },
     {
       field: 'productId',
       headerName: 'Product',

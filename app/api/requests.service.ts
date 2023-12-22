@@ -31,11 +31,11 @@ export const duplicateRequest = async (request: Request): Promise<Request> => {
 };
 
 export const stopScrapper = async (): Promise<void> => {
-  const response = await axios.post(`${SCRAPPER_URL}/requests/stop`);
+  const response = await axios.post(`${SCRAPPER_URL}/requests/stop`, {});
   return response.data;
 };
 
 export const startScrapper = async (): Promise<void> => {
-  const response = await axios.post(`${SCRAPPER_URL}/requests/start`);
+  const response = await axios.post(`${SCRAPPER_URL}/requests/start`, {});
   return response.data;
 };

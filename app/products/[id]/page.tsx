@@ -157,9 +157,11 @@ export default function Product({ params }: { params: { id: string } }) {
           <>
             <Grid>
               <Typography>{probabilityAvg(params.value)}%</Typography>
-              <Typography sx={{ fontSize: 'smaller' }}>
-                {params.value.join(', ')}
-              </Typography>
+              {params.value.length && (
+                <Typography sx={{ fontSize: 'smaller' }}>
+                  {params.value.join(', ')}
+                </Typography>
+              )}
             </Grid>
           </>
         );
@@ -195,19 +197,22 @@ export default function Product({ params }: { params: { id: string } }) {
                   </IconButton>
                 </Tooltip>
               </Grid>
-              {!params.row.percentage.find((p: any) => parseInt(p) === 100) && (
-                <Grid item>
-                  <Tooltip title="Verify match">
-                    <IconButton
-                      onClick={() => {
-                        verify(productId, params.row._id);
-                      }}
-                    >
-                      <GridCheckCircleIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Grid>
-              )}
+              {params.row.percentage.length &&
+                !params.row.percentage.find(
+                  (p: any) => parseInt(p) === 100,
+                ) && (
+                  <Grid item>
+                    <Tooltip title="Verify match">
+                      <IconButton
+                        onClick={() => {
+                          verify(productId, params.row._id);
+                        }}
+                      >
+                        <GridCheckCircleIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Grid>
+                )}
             </Grid>
           </>
         );
