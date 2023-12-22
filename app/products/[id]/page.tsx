@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import { Matches, Product, ProductType } from '../../entities/product.entity';
 import {
   checkProductMatches,
+  findProductInMarketplaces,
   getProduct,
   verifyProduct,
 } from '../../api/products.service';
@@ -56,6 +57,14 @@ export default function Product({ params }: { params: { id: string } }) {
 
   const router = useRouter();
 
+  const findInMarkets = async () => {
+    try {
+      await findProductInMarketplaces(productId);
+      toast.success('Searching product in marketplaces...');
+    } catch (e: any) {
+      ApiHandlerError(e as AxiosError);
+    }
+  };
   const verify = async (id: string, matchId: string) => {
     try {
       const verified = await verifyProduct(id, matchId);
@@ -245,6 +254,16 @@ export default function Product({ params }: { params: { id: string } }) {
                     <Link href={product.originUrl} target="_blank">
                       Visit
                     </Link>
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      findInMarkets();
+                    }}
+                  >
+                    Find in Marketplaces
                   </Button>
                 </Grid>
               </Grid>

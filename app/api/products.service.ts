@@ -46,3 +46,10 @@ export const checkProductMatches = async (
   );
   return response.data;
 };
+
+export const findProductInMarketplaces = async (id: string): Promise<void> => {
+  const response = await axios.patch(
+    `${API_URL}/products/${id}/findinmarketplaces`,
+  );
+  return response.data;
+};
