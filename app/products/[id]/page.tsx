@@ -13,13 +13,18 @@ import {
   Avatar,
   IconButton,
   Tooltip,
+  List,
+  ListItemText,
+  ListItem,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Matches, Product, ProductType } from '../../entities/product.entity';
 import {
   checkProductMatches,
   findProductInMarketplaces,
+  generateReviews,
   getProduct,
+  getProductFacts,
   verifyProduct,
 } from '../../api/products.service';
 import { ApiHandlerError } from '../../api/api.handler';
@@ -41,6 +46,7 @@ import {
   GridToolbar,
 } from '@mui/x-data-grid';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import { scrapeProductInfo, scrapeReviews } from '../../api/requests.service';
 
 export default function Product({ params }: { params: { id: string } }) {
   const [productId, setProductId] = useState<string>(params.id);
@@ -288,6 +294,12 @@ export default function Product({ params }: { params: { id: string } }) {
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
+              <Button
+                variant="contained"
+                onClick={() => scrapeProductInfo(product)}
+              >
+                Scrape info
+              </Button>
               <Grid container spacing={2} mb={6}>
                 <Grid item xs={12}>
                   <Typography>
@@ -386,7 +398,21 @@ export default function Product({ params }: { params: { id: string } }) {
                 Facts
               </Typography>
             </AccordionSummary>
-            <AccordionDetails></AccordionDetails>
+            <AccordionDetails>
+              <Button
+                variant="contained"
+                onClick={() => getProductFacts(productId)}
+              >
+                Get Facts
+              </Button>
+              <List>
+                {product?.facts?.map((fact, i) => (
+                  <ListItem key={i}>
+                    <ListItemText>{fact}</ListItemText>
+                  </ListItem>
+                ))}
+              </List>
+            </AccordionDetails>
           </Accordion>
 
           <Accordion
@@ -398,25 +424,46 @@ export default function Product({ params }: { params: { id: string } }) {
               id="reviews-header"
             >
               <Typography sx={{ width: '33%', flexShrink: 0 }}>
-                Reviews
+                Reviews ({reviews.length})
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
+              <Button
+                variant="contained"
+                onClick={() => scrapeReviews(product)}
+              >
+                Scrape Reviews
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => generateReviews(productId)}
+              >
+                Generate new reviews
+              </Button>
               {reviews?.map((review, i) => (
                 <Card variant="outlined" key={i}>
                   <CardContent>
-                    <Grid container>
-                      {review.userAvatar && (
-                        <Grid itemScope>
-                          <Avatar src={review.userAvatar} />
+                    <Typography>Type: {review.type}</Typography>
+                  </CardContent>
+                  {review.username ||
+                    (review.userAvatar && (
+                      <CardContent>
+                        <Grid container>
+                          {review.userAvatar && (
+                            <Grid itemScope>
+                              <Avatar src={review.userAvatar} />
+                            </Grid>
+                          )}
+                          {review.username && (
+                            <Grid item>
+                              <Typography>{review.username}</Typography>
+                            </Grid>
+                          )}
                         </Grid>
-                      )}
-                      {review.username && (
-                        <Grid item>
-                          <Typography>{review.username}</Typography>
-                        </Grid>
-                      )}
-                    </Grid>
+                      </CardContent>
+                    ))}
+                  <CardContent>
+                    <Typography>Rating: {review.rating}/5</Typography>
                   </CardContent>
                   <CardContent>
                     <Typography>{review.title}</Typography>

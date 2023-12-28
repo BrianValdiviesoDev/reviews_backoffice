@@ -1,5 +1,11 @@
 import axios from './axiosConfig';
-import { PutRequest, Request, RequestStatus } from '../entities/request.entity';
+import {
+  PutRequest,
+  Request,
+  RequestStatus,
+  RequestType,
+} from '../entities/request.entity';
+import { Product } from '../entities/product.entity';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const SCRAPPER_URL = process.env.NEXT_PUBLIC_SCRAPPER_URL;
@@ -37,5 +43,27 @@ export const stopScrapper = async (): Promise<void> => {
 
 export const startScrapper = async (): Promise<void> => {
   const response = await axios.post(`${SCRAPPER_URL}/requests/start`, {});
+  return response.data;
+};
+
+export const scrapeProductInfo = async (product: Product): Promise<Request> => {
+  const request: PutRequest = {
+    url: product.originUrl,
+    type: RequestType.GET_PRODUCT_INFO,
+    status: RequestStatus.PENDING,
+    productId: product._id,
+  };
+  const response = await axios.post(`${API_URL}/requests`, request);
+  return response.data;
+};
+
+export const scrapeReviews = async (product: Product): Promise<Request> => {
+  const request: PutRequest = {
+    url: product.originUrl,
+    type: RequestType.GET_REVIEWS,
+    status: RequestStatus.PENDING,
+    productId: product._id,
+  };
+  const response = await axios.post(`${API_URL}/requests`, request);
   return response.data;
 };

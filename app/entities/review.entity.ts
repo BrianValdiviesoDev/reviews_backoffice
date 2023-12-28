@@ -1,6 +1,13 @@
+export enum ReviewType {
+  MANUAL = 'MANUAL',
+  SCRAPPED = 'SCRAPPED',
+  GENERATED = 'GENERATED',
+}
+
 export interface Review {
   _id: string;
   product: string;
+  type: ReviewType;
   title: string;
   url?: string;
   description: string;

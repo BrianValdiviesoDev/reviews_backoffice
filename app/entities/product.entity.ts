@@ -34,6 +34,7 @@ export interface Product {
   reviews?: number;
   scrappedReviews?: number;
   generatedReviews?: number;
+  facts?: string[];
   updatedAt: Date;
   createdAt: Date;
 }

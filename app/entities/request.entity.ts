@@ -8,6 +8,7 @@ export enum RequestStatus {
 export enum RequestType {
   FIND_PRODUCT = 'FIND_PRODUCT',
   GET_REVIEWS = 'GET_REVIEWS',
+  GET_PRODUCT_INFO = 'GET_PRODUCT_INFO',
 }
 export interface Request {
   _id: string;

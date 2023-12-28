@@ -52,3 +52,13 @@ export const findProductInMarketplaces = async (id: string): Promise<void> => {
   );
   return response.data;
 };
+
+export const getProductFacts = async (id: string): Promise<void> => {
+  const response = await axios.post(`${API_URL}/queues/getFacts/${id}`);
+  return response.data;
+};
+
+export const generateReviews = async (id: string): Promise<void> => {
+  const response = await axios.post(`${API_URL}/queues/generateReviews/${id}`);
+  return response.data;
+};
